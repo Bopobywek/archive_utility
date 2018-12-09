@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'arc.ui'
+# Form implementation generated from reading ui file '/home/andrew/Documents/workfolder/yandex_project/arc.ui'
 #
 # Created by: PyQt5 UI code generator 5.5.1
 #
@@ -18,10 +18,10 @@ class Ui_MainWindow(object):
         self.pushButton.setGeometry(QtCore.QRect(20, 40, 121, 61))
         self.pushButton.setObjectName("pushButton")
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_2.setGeometry(QtCore.QRect(160, 40, 121, 61))
+        self.pushButton_2.setGeometry(QtCore.QRect(300, 40, 121, 61))
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_3 = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_3.setGeometry(QtCore.QRect(300, 40, 121, 61))
+        self.pushButton_3.setGeometry(QtCore.QRect(440, 40, 121, 61))
         self.pushButton_3.setObjectName("pushButton_3")
         self.treeView = QtWidgets.QTreeView(self.centralwidget)
         self.treeView.setGeometry(QtCore.QRect(20, 120, 541, 441))
@@ -39,6 +39,9 @@ class Ui_MainWindow(object):
         self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_4.setGeometry(QtCore.QRect(750, 90, 21, 21))
         self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_5 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_5.setGeometry(QtCore.QRect(160, 40, 121, 61))
+        self.pushButton_5.setObjectName("pushButton_5")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 806, 26))
@@ -54,9 +57,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Archiver"))
-        self.pushButton.setText(_translate("MainWindow", "Add"))
+        self.pushButton.setText(_translate("MainWindow", "Add folder"))
         self.pushButton_2.setText(_translate("MainWindow", "Extract all"))
         self.pushButton_3.setText(_translate("MainWindow", "Delete"))
         self.label.setText(_translate("MainWindow", "Recent archives"))
         self.pushButton_4.setText(_translate("MainWindow", "↻"))
+        self.pushButton_5.setText(_translate("MainWindow", "Add file"))
 
