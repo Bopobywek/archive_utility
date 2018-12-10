@@ -7,6 +7,7 @@ from PyQt5.QtCore import QDir, QFileInfo, QLibraryInfo, Qt, QModelIndex
 from archive_d import Ui_MainWindow
 from exit_dialog_d import Ui_Dialog
 import uuid
+from archive_funcs import ArchiveFunctions
 
 
 # noinspection PyCallByClass
@@ -42,10 +43,8 @@ class Archive(QMainWindow, Ui_MainWindow):
     def create_arhcive(self, name_arc, result_type,
                        dir_name_out, dir_name_in):
         try:
-            res = shutil.make_archive(name_arc, result_type, root_dir=QDir.rootPath(),
-                                      base_dir=dir_name_out[dir_name_out.rfind("/") + 1:])
-            if dir_name_in != os.getcwd():
-                shutil.move(res[res.rfind("/") + 1:], dir_name_in)
+            res = shutil.make_archive(os.path.join(dir_name_in, name_arc), format=result_type,
+                                      root_dir=dir_name_out)
             with open("arcs.txt", mode="a", encoding="utf-8") as info_out:
                 info_out.write("{}{}\n".format(dir_name_in, res[res.rfind("/"):]))
             QMessageBox.about(self, "Archive status", "Successfull!")
@@ -106,7 +105,6 @@ class Archive(QMainWindow, Ui_MainWindow):
         if self.file != "" and os.path.isfile(self.file) and not self.check_is_file_arc(self.file):
             directory = "{}_{}".format(self.file[self.file.rfind("/") + 1:], uuid.uuid4().hex)
             if not os.path.exists(directory):
-                print(self.file[:self.file.rfind("/")])
                 new_path = "{}/{}/{}".format(self.file[:self.file.rfind("/")], directory,
                                              self.file[self.file.rfind("/") + 1:])
                 os.mkdir("{}/{}".format(self.file[:self.file.rfind("/")], directory))
