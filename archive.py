@@ -304,9 +304,6 @@ class Archive(QMainWindow, Ui_MainWindow):
         success.setStandardButtons(QMessageBox.Ok)
         success.exec_()
 
-    def delete(self):
-        pass
-
 
 class ArchiveFunctional(object):
 
