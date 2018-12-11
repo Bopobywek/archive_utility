@@ -2,7 +2,7 @@ import shutil
 import os
 import sys
 from PyQt5.QtWidgets import QInputDialog, QFileDialog, \
-    QMessageBox, QAction
+    QMessageBox, QAction, qApp
 from PyQt5.QtWidgets import QApplication, QMainWindow, \
     QFileSystemModel, QToolTip, QDialog
 from PyQt5.QtCore import QDir
@@ -12,7 +12,7 @@ from archive_content_d import Ui_Dialog
 import uuid
 
 
-# noinspection PyCallByClass,PyBroadException
+# noinspection PyCallByClass, PyBroadException, PyTypeChecker, PyArgumentList, PyArgumentList
 class Archive(QMainWindow, Ui_MainWindow):
 
     def __init__(self):
@@ -45,6 +45,11 @@ class Archive(QMainWindow, Ui_MainWindow):
         view_action.triggered.connect(self.view_archive)
         archive_menu = self.menubar.addMenu('&Archive')
         archive_menu.addAction(view_action)
+        exit_action = QAction("&Exit", self)
+        exit_action.setShortcut("Ctrl+Shift+E")
+        exit_action.setStatusTip("Exit from app")
+        exit_action.triggered.connect(qApp.exit)
+        archive_menu.addAction(exit_action)
 
     def update_recent_arcs(self):
         self.listWidget.clear()
@@ -55,73 +60,82 @@ class Archive(QMainWindow, Ui_MainWindow):
             with open("arcs.txt", encoding="utf-8") as filein:
                 output = filein.readlines()
         else:
-            with open("arcs.txt", mode="w", encoding="utf-8") as filein:
+            with open("arcs.txt", mode="w", encoding="utf-8"):
                 output = []
         for i in output:
             self.listWidget.addItem(i)
 
     def button_first_clicked(self):
         """'Add folder' button click handler."""
-        if self.file != "" and os.path.isdir(self.file):
-            self.user_interface_creating_arc(self.file)
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.resize(300, 300)
-            msg.move(self.x() + 300, self.y() + 350)
-            if self.file == "":
-                msg.setText("Укажите папку для архивирования")
-                msg.setWindowTitle("Ошибка!")
-            elif not os.path.isdir(self.file):
-                msg.setText("Укажите ПАПКУ для архивирования")
-                msg.setWindowTitle("Ошибка!")
-            msg.setStandardButtons(QMessageBox.Cancel)
-            msg.exec_()
+        try:
+            if self.file != "" and os.path.isdir(self.file):
+                self.user_interface_creating_arc(self.file)
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.resize(300, 300)
+                msg.move(self.x() + 300, self.y() + 350)
+                if self.file == "":
+                    msg.setText("Укажите папку для архивирования")
+                    msg.setWindowTitle("Ошибка!")
+                elif not os.path.isdir(self.file):
+                    msg.setText("Укажите ПАПКУ для архивирования")
+                    msg.setWindowTitle("Ошибка!")
+                msg.setStandardButtons(QMessageBox.Cancel)
+                msg.exec_()
+        except Exception as e:
+            self.show_report_msgbox(e)
 
     def button_second_clicked(self):
         """'Add file' button click handler."""
-        if self.file != "" and os.path.isfile(self.file) and not self.check_is_file_arc(self.file):
-            directory = "{}_{}".format(self.file[self.file.rfind("/") + 1:], uuid.uuid4().hex)
-            if not os.path.exists(directory):
-                new_path = "{}/{}/{}".format(self.file[:self.file.rfind("/")], directory,
-                                             self.file[self.file.rfind("/") + 1:])
-                os.mkdir("{}/{}".format(self.file[:self.file.rfind("/")], directory))
-                os.rename(self.file, new_path)
-                self.user_interface_creating_arc("{}/{}".format(self.file[:self.file.rfind("/")],
-                                                                directory))
-                os.rename(new_path, self.file)
-                os.removedirs("{}/{}".format(self.file[:self.file.rfind("/")], directory))
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.resize(300, 300)
-            msg.move(self.x() + 300, self.y() + 350)
-            if self.file == "":
-                msg.setText("Укажите файл для архивации, который не является архивом")
-                msg.setWindowTitle("Ошибка!")
-            elif not os.path.isfile(self.file) or self.check_is_file_arc(self.file):
-                msg.setText("Укажите файл для архивации, который не является архивом")
-                msg.setWindowTitle("Ошибка!")
-            msg.setStandardButtons(QMessageBox.Cancel)
-            msg.exec_()
+        try:
+            if self.file != "" and os.path.isfile(self.file) and not self.check_is_file_arc(self.file):
+                directory = "{}_{}".format(self.file[self.file.rfind("/") + 1:], uuid.uuid4().hex)
+                if not os.path.exists(directory):
+                    new_path = "{}/{}/{}".format(self.file[:self.file.rfind("/")], directory,
+                                                 self.file[self.file.rfind("/") + 1:])
+                    os.mkdir("{}/{}".format(self.file[:self.file.rfind("/")], directory))
+                    os.rename(self.file, new_path)
+                    self.user_interface_creating_arc("{}/{}".format(self.file[:self.file.rfind("/")],
+                                                                    directory))
+                    os.rename(new_path, self.file)
+                    os.removedirs("{}/{}".format(self.file[:self.file.rfind("/")], directory))
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.resize(300, 300)
+                msg.move(self.x() + 300, self.y() + 350)
+                if self.file == "":
+                    msg.setText("Укажите файл для архивации, который не является архивом")
+                    msg.setWindowTitle("Ошибка!")
+                elif not os.path.isfile(self.file) or self.check_is_file_arc(self.file):
+                    msg.setText("Укажите файл для архивации, который не является архивом")
+                    msg.setWindowTitle("Ошибка!")
+                msg.setStandardButtons(QMessageBox.Cancel)
+                msg.exec_()
+        except Exception as e:
+            self.show_report_msgbox(e)
 
     def button_third_clicked(self):
         """'Extarct all' button click handler."""
-        if self.file != "" and os.path.isfile(self.file) and self.check_is_file_arc(self.file):
-            self.user_interface_extarct_arc(self.file)
-        else:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.resize(300, 300)
-            msg.move(self.x() + 300, self.y() + 350)
-            if self.file == "":
-                msg.setText("Укажите архив для распаковки")
-                msg.setWindowTitle("Ошибка!")
-            elif not os.path.isfile(self.file) or not self.check_is_file_arc(self.file):
-                msg.setText("Укажите АРХИВ для распаковки")
-                msg.setWindowTitle("Ошибка!")
-            msg.setStandardButtons(QMessageBox.Cancel)
-            msg.exec_()
+        try:
+            if self.file != "" and os.path.isfile(self.file) and self.check_is_file_arc(self.file):
+                self.user_interface_extarct_arc(self.file)
+            else:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.resize(300, 300)
+                msg.move(self.x() + 300, self.y() + 350)
+                if self.file == "":
+                    msg.setText("Укажите архив для распаковки")
+                    msg.setWindowTitle("Ошибка!")
+                elif not os.path.isfile(self.file) or not self.check_is_file_arc(self.file):
+                    msg.setText("Укажите АРХИВ для распаковки")
+                    msg.setWindowTitle("Ошибка!")
+                msg.setStandardButtons(QMessageBox.Cancel)
+                msg.exec_()
+        except Exception as e:
+            self.show_report_msgbox(e)
 
     @staticmethod
     def check_is_file_arc(name_arc):
@@ -167,7 +181,7 @@ class Archive(QMainWindow, Ui_MainWindow):
     def user_interface_creating_arc(self, dir_name_out):
         """Calls the user interface.
 
-        dir_name_out - argument with the path to the folder to be archived
+        dir_name_out - argument with the path to the folder to be archived.
 
         """
         if dir_name_out:
@@ -184,52 +198,61 @@ class Archive(QMainWindow, Ui_MainWindow):
                 if state_arc:
                     dir_name_in = QFileDialog.getExistingDirectory(self, 'Select directory')
                     if dir_name_in:
-                        result, message = ArchiveFunctional().create_arhcive(name_arc, result_type, 
+                        result, message = ArchiveFunctional().create_arhcive(name_arc, result_type,
                                                                              dir_name_out, dir_name_in)
                         if not result:
                             self.show_report_msgbox(message)
+                        else:
+                            self.show_success_msgbox("Archiving", "Success creating!")
 
     def user_interface_extarct_arc(self, name_arc):
         """Calls the user interface.
 
-        name_arc - archive name to unpack
+        name_arc - archive name to unpack.
 
         """
         if name_arc:
-            if self.check_is_file_arc(name_arc):
-                dir_name_in = QFileDialog.getExistingDirectory(self,
-                                                               'Select directory for extarct all files')
-                if dir_name_in:
-                    result, message = ArchiveFunctional().extract_arhcive(name_arc, dir_name_in)
-                    if not result:
-                        self.show_report_msgbox(message)
-
-            else:
-                report = QMessageBox()
-                report.setIcon(QMessageBox.Critical)
-                report.resize(300, 300)
-                report.move(self.x() + 300, self.y() + 350)
-                report.setText("Bad file type!")
-                report.setWindowTitle("File Type")
-                report.setDetailedText("The details are as follows:\n BadType fo archive. "
-                                       "Указан тип архива, который не поддерживается программой")
-                report.setStandardButtons(QMessageBox.Cancel)
-                report.exec_()
+            try:
+                if self.check_is_file_arc(name_arc):
+                    dir_name_in = QFileDialog.getExistingDirectory(self,
+                                                                   'Select directory for extarct all files')
+                    if dir_name_in:
+                        result, message = ArchiveFunctional().extract_arhcive(name_arc, dir_name_in)
+                        if not result:
+                            self.show_report_msgbox(message)
+                        else:
+                            self.show_success_msgbox("Extracting", "Success extracting!")
+                else:
+                    report = QMessageBox()
+                    report.setIcon(QMessageBox.Critical)
+                    report.resize(300, 300)
+                    report.move(self.x() + 300, self.y() + 350)
+                    report.setText("Bad file type!")
+                    report.setWindowTitle("File Type")
+                    report.setDetailedText("The details are as follows:\n BadType fo archive. "
+                                           "Указан тип архива, который не поддерживается программой")
+                    report.setStandardButtons(QMessageBox.Cancel)
+                    report.exec_()
+            except Exception as e:
+                self.show_report_msgbox(e)
 
     def view_archive(self):
-        file = self.model.filePath(self.treeView.currentIndex())
-        if file and self.check_is_file_arc(file):
-            name_of_directory = str(uuid.uuid4().hex)
-            os.mkdir(os.path.join(os.getcwd(), name_of_directory))
-            result, message = ArchiveFunctional().extract_arhcive(file,
-                                                                  os.path.join(os.getcwd(), name_of_directory))
-            if not result:
-                self.show_report_msgbox(message)
+        try:
+            file = self.model.filePath(self.treeView.currentIndex())
+            if file and self.check_is_file_arc(file):
+                name_of_directory = str(uuid.uuid4().hex)
+                os.mkdir(os.path.join(os.getcwd(), name_of_directory))
+                result, message = ArchiveFunctional().extract_arhcive(file,
+                                                                      os.path.join(os.getcwd(), name_of_directory))
+                if not result:
+                    self.show_report_msgbox(message)
+                else:
+                    DialogView(os.path.join(os.getcwd(), name_of_directory)).exec_()
+                    shutil.rmtree(os.path.join(os.getcwd(), name_of_directory))
             else:
-                DialogView(os.path.join(os.getcwd(), name_of_directory)).exec_()
-                shutil.rmtree(os.path.join(os.getcwd(), name_of_directory))
-        else:
-            self.show_report_msgbox("Archive is not selected, or unsupported archive is selected.")
+                self.show_report_msgbox("Archive is not selected, or unsupported archive is selected.")
+        except Exception as e:
+            self.show_report_msgbox(e)
 
     def show_report_msgbox(self, message):
         report = QMessageBox()
@@ -242,8 +265,15 @@ class Archive(QMainWindow, Ui_MainWindow):
         report.setStandardButtons(QMessageBox.Cancel)
         report.exec_()
 
-    def delete(self):
-        pass
+    def show_success_msgbox(self, title, message):
+        success = QMessageBox()
+        success.setIcon(QMessageBox.Information)
+        success.resize(300, 300)
+        success.move(self.x() + 300, self.y() + 350)
+        success.setText(message)
+        success.setWindowTitle(title)
+        success.setStandardButtons(QMessageBox.Ok)
+        success.exec_()
 
 
 class ArchiveFunctional(object):
@@ -287,6 +317,8 @@ class DialogView(QDialog, Ui_Dialog):
         super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.close)
+        self.return_btn.clicked.connect(self.back)
+        self.start_path = path
         self.path = path
         self.show_files()
         self.listWidget.doubleClicked.connect(self.show_folder)
@@ -301,6 +333,11 @@ class DialogView(QDialog, Ui_Dialog):
         file = self.listWidget.itemFromIndex(item).text()
         if os.path.isdir(os.path.join(self.path, file)):
             self.path = os.path.join(self.path, file)
+            self.show_files()
+
+    def back(self):
+        if self.path != self.start_path:
+            self.path = self.path[:self.path.rfind("/")]
             self.show_files()
 
 

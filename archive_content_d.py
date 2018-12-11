@@ -25,13 +25,17 @@ class Ui_Dialog(object):
         self.label.setFont(font)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
+        self.return_btn = QtWidgets.QPushButton(Dialog)
+        self.return_btn.setGeometry(QtCore.QRect(20, 69, 95, 21))
+        self.return_btn.setObjectName("return_btn")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Dialog", "Content"))
         self.pushButton.setText(_translate("Dialog", "Cancel"))
         self.label.setText(_translate("Dialog", "Archive content"))
+        self.return_btn.setText(_translate("Dialog", "←"))
 

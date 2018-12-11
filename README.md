@@ -13,5 +13,5 @@ The program interface will open.
 To close the program, click on the cross in the upper right corner.
 
 ## Requirements
-I've only tested this utility on linux with kernel 4.15
+I've only tested this utility on linux with kernel 4.15, Windows 10 with python 3.5/
 
