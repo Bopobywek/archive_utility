@@ -5,13 +5,11 @@ from PyQt5.QtWidgets import QInputDialog, QFileDialog, \
     QMessageBox, QAction, qApp
 from PyQt5.QtWidgets import QApplication, QMainWindow, \
     QFileSystemModel, QToolTip, QDialog
-from PyQt5.QtCore import QDir, Qt
+from PyQt5.QtCore import QDir
 from PyQt5.QtGui import QFont
 from archive_d import Ui_MainWindow
 from archive_content_d import Ui_Dialog
-from settings_d import Ui_Dialog_2
 import uuid
-import json
 
 
 # noinspection PyCallByClass, PyBroadException, PyTypeChecker, PyArgumentList, PyArgumentList
@@ -40,7 +38,6 @@ class Archive(QMainWindow, Ui_MainWindow):
         self.treeView.clicked.connect(self.arc_once_clicked)
         self.treeView.doubleClicked.connect(self.arc_double_clicked)
         self.file = ""
-        self.saving_info = True
         self.show_recent_arcs()
         view_action = QAction("&View archive content", self)
         view_action.setShortcut("Ctrl+Shift+A")
@@ -48,17 +45,11 @@ class Archive(QMainWindow, Ui_MainWindow):
         view_action.triggered.connect(self.view_archive)
         archive_menu = self.menubar.addMenu('&Archive')
         archive_menu.addAction(view_action)
-        settings_action = QAction("&Settings", self)
-        settings_action.setShortcut("Ctrl+Shift+L")
-        settings_action.setStatusTip("Open settings menu")
-        settings_action.triggered.connect(self.settings_interface)
-        archive_menu.addAction(settings_action)
         exit_action = QAction("&Exit", self)
         exit_action.setShortcut("Ctrl+Shift+E")
         exit_action.setStatusTip("Exit from app")
         exit_action.triggered.connect(qApp.exit)
         archive_menu.addAction(exit_action)
-        self.update_settings_info()
 
     def update_recent_arcs(self):
         self.listWidget.clear()
@@ -187,29 +178,10 @@ class Archive(QMainWindow, Ui_MainWindow):
                                       if "Yes" in x.text() else msg.close())
             msg.exec_()
 
-    def update_settings_info(self):
-        ArchiveFunctional().settings_file_init()
-        data = json.loads(open("settings_arcs.json", encoding="utf8").read())
-        if "animations" in data:
-            self.setAnimated(data["animations"])
-        if "saving_info" in data:
-            self.saving_info = data["saving_info"]
-            ArchiveFunctional().clear_info()
-
-    def settings_interface(self):
-        SettingsView().exec_()
-        result = SettingsView().return_result()
-        if result:
-            result, msg = result
-            if result:
-                self.show_success_msgbox("Saving", "Successfully saved")
-            else:
-                self.show_report_msgbox(msg)
-
     def user_interface_creating_arc(self, dir_name_out):
         """Calls the user interface.
 
-        dir_name_out - argument with the path to the folder to be archived
+        dir_name_out - argument with the path to the folder to be archived.
 
         """
         if dir_name_out:
@@ -227,8 +199,7 @@ class Archive(QMainWindow, Ui_MainWindow):
                     dir_name_in = QFileDialog.getExistingDirectory(self, 'Select directory')
                     if dir_name_in:
                         result, message = ArchiveFunctional().create_arhcive(name_arc, result_type,
-                                                                             dir_name_out, dir_name_in,
-                                                                             self.saving_info)
+                                                                             dir_name_out, dir_name_in)
                         if not result:
                             self.show_report_msgbox(message)
                         else:
@@ -237,7 +208,7 @@ class Archive(QMainWindow, Ui_MainWindow):
     def user_interface_extarct_arc(self, name_arc):
         """Calls the user interface.
 
-        name_arc - archive name to unpack
+        name_arc - archive name to unpack.
 
         """
         if name_arc:
@@ -311,29 +282,17 @@ class ArchiveFunctional(object):
         super().__init__()
 
     @staticmethod
-    def clear_info():
-        if os.path.exists(os.path.join(os.getcwd(), "arcs.txt")):
-            os.remove(os.path.join(os.getcwd(), "arcs.txt"))
-
-    @staticmethod
-    def settings_file_init():
-        if not os.path.exists(os.path.join(os.getcwd(), "settings_arcs.json")):
-            with open("settings_arcs.json", mode="w", encoding="utf-8") as fout:
-                fout.write("{}")
-
-    @staticmethod
     def create_arhcive(name_arc, result_type,
-                       dir_name_out, dir_name_in, saving_info):
+                       dir_name_out, dir_name_in):
         try:
             res = shutil.make_archive(os.path.join(dir_name_in, name_arc), format=result_type,
                                       root_dir=dir_name_out)
-            if saving_info:
-                if os.path.exists(os.path.join(os.getcwd(), "arcs.txt")):
-                    with open("arcs.txt", mode="a", encoding="utf-8") as info_out:
-                        info_out.write("{}{}\n".format(dir_name_in, res[res.rfind("/"):]))
-                else:
-                    with open("arcs.txt", mode="w", encoding="utf-8") as info_out:
-                        info_out.write("{}{}\n".format(dir_name_in, res[res.rfind("/"):]))
+            if os.path.exists(os.path.join(os.getcwd(), "arcs.txt")):
+                with open("arcs.txt", mode="a", encoding="utf-8") as info_out:
+                    info_out.write("{}{}\n".format(dir_name_in, res[res.rfind("/"):]))
+            else:
+                with open("arcs.txt", mode="w", encoding="utf-8") as info_out:
+                    info_out.write("{}{}\n".format(dir_name_in, res[res.rfind("/"):]))
         except Exception as e:
             return False, e
         else:
@@ -380,47 +339,6 @@ class DialogView(QDialog, Ui_Dialog):
         if self.path != self.start_path:
             self.path = self.path[:self.path.rfind("/")]
             self.show_files()
-
-
-class SettingsView(QDialog, Ui_Dialog_2):
-
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        self.checkBox.stateChanged.connect(self.change)
-        self.checkBox_2.stateChanged.connect(self.change)
-        self.cancel_btn.clicked.connect(self.close)
-        self.save_btn.clicked.connect(self.save)
-        self.result = None
-        ArchiveFunctional().settings_file_init()
-        self.data = json.loads(open("settings_arcs.json", encoding="utf8").read())
-        if not bool(self.data):
-            self.checkBox.setChecked(True)
-            self.checkBox_2.setChecked(True)
-        else:
-            if "animations" in self.data:
-                self.checkBox_2.setChecked(self.data["animations"])
-            if "saving_info" in self.data:
-                self.checkBox.setChecked(self.data["saving_info"])
-
-    def change(self):
-        sender_object = self.sender().objectName()
-        if sender_object == "checkBox":
-            self.data["saving_info"] = self.checkBox.isChecked()
-        elif sender_object == "checkBox_2":
-            self.data["animations"] = self.checkBox_2.isChecked()
-
-    def save(self):
-        try:
-            with open("settings_arcs.json", mode="w", encoding="utf-8") as fileout:
-                fileout.write(json.dumps(self.data))
-            self.result = (True, "ok")
-        except Exception as e:
-            self.result = (False, e)
-        self.close()
-
-    def return_result(self):
-        return self.result
 
 
 if __name__ == '__main__':
