@@ -227,9 +227,7 @@ class Archive(QMainWindow, Ui_MainWindow):
                 self.show_report_msgbox(message)
             else:
                 DialogView(os.path.join(os.getcwd(), name_of_directory)).exec_()
-                for i in os.listdir(os.path.join(os.getcwd(), name_of_directory)):
-                    os.remove(os.path.join(os.path.join(os.getcwd(), name_of_directory), i))
-                os.rmdir(os.path.join(os.getcwd(), name_of_directory))
+                shutil.rmtree(os.path.join(os.getcwd(), name_of_directory))
         else:
             self.show_report_msgbox("Archive is not selected, or unsupported archive is selected.")
 
@@ -291,11 +289,19 @@ class DialogView(QDialog, Ui_Dialog):
         self.pushButton.clicked.connect(self.close)
         self.path = path
         self.show_files()
+        self.listWidget.doubleClicked.connect(self.show_folder)
 
     def show_files(self):
+        self.listWidget.clear()
         if os.path.isdir(self.path):
             for el in os.listdir(self.path):
                 self.listWidget.addItem(el)
+
+    def show_folder(self, item):
+        file = self.listWidget.itemFromIndex(item).text()
+        if os.path.isdir(os.path.join(self.path, file)):
+            self.path = os.path.join(self.path, file)
+            self.show_files()
 
 
 if __name__ == '__main__':
