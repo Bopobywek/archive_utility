@@ -58,6 +58,7 @@ class Archive(QMainWindow, Ui_MainWindow):
         exit_action.setStatusTip("Exit from app")
         exit_action.triggered.connect(qApp.exit)
         archive_menu.addAction(exit_action)
+        self.update_settings_info()
 
     def update_recent_arcs(self):
         self.listWidget.clear()
@@ -186,9 +187,24 @@ class Archive(QMainWindow, Ui_MainWindow):
                                       if "Yes" in x.text() else msg.close())
             msg.exec_()
 
-    def settings_interface(self):
-        result = SettingsView().exec_()
+    def update_settings_info(self):
+        ArchiveFunctional().settings_file_init()
+        data = json.loads(open("settings_arcs.json", encoding="utf8").read())
+        if "animations" in data:
+            self.setAnimated(data["animations"])
+        if "saving_info" in data:
+            self.saving_info = data["saving_info"]
+            ArchiveFunctional().clear_info()
 
+    def settings_interface(self):
+        SettingsView().exec_()
+        result = SettingsView().return_result()
+        if result:
+            result, msg = result
+            if result:
+                self.show_success_msgbox("Saving", "Successfully saved")
+            else:
+                self.show_report_msgbox(msg)
 
     def user_interface_creating_arc(self, dir_name_out):
         """Calls the user interface.
@@ -298,6 +314,11 @@ class ArchiveFunctional(object):
         super().__init__()
 
     @staticmethod
+    def clear_info():
+        if os.path.exists(os.path.join(os.getcwd(), "arcs.txt")):
+            os.remove(os.path.join(os.getcwd(), "arcs.txt"))
+
+    @staticmethod
     def settings_file_init():
         if not os.path.exists(os.path.join(os.getcwd(), "settings_arcs.json")):
             with open("settings_arcs.json", mode="w", encoding="utf-8") as fout:
@@ -373,10 +394,19 @@ class SettingsView(QDialog, Ui_Dialog_2):
         self.checkBox_2.stateChanged.connect(self.change)
         self.cancel_btn.clicked.connect(self.close)
         self.save_btn.clicked.connect(self.save)
+        self.result = None
         ArchiveFunctional().settings_file_init()
         self.data = json.loads(open("settings_arcs.json", encoding="utf8").read())
+        if not bool(self.data):
+            self.checkBox.setChecked(True)
+            self.checkBox_2.setChecked(True)
+        else:
+            if "animations" in self.data:
+                self.checkBox_2.setChecked(self.data["animations"])
+            if "saving_info" in self.data:
+                self.checkBox.setChecked(self.data["saving_info"])
 
-    def change(self, *args):
+    def change(self):
         sender_object = self.sender().objectName()
         if sender_object == "checkBox":
             self.data["saving_info"] = self.checkBox.isChecked()
@@ -387,9 +417,13 @@ class SettingsView(QDialog, Ui_Dialog_2):
         try:
             with open("settings_arcs.json", mode="w", encoding="utf-8") as fileout:
                 fileout.write(json.dumps(self.data))
-            return True, "ok"
+            self.result = (True, "ok")
         except Exception as e:
-            return False, e
+            self.result = (False, e)
+        self.close()
+
+    def return_result(self):
+        return self.result
 
 
 if __name__ == '__main__':
