@@ -12,9 +12,9 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(817, 585)
-        self.pushButton = QtWidgets.QPushButton(Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(210, 520, 371, 41))
-        self.pushButton.setObjectName("pushButton")
+        self.cancel_btn = QtWidgets.QPushButton(Dialog)
+        self.cancel_btn.setGeometry(QtCore.QRect(210, 520, 371, 41))
+        self.cancel_btn.setObjectName("cancel_btn")
         self.listWidget = QtWidgets.QListWidget(Dialog)
         self.listWidget.setGeometry(QtCore.QRect(20, 90, 761, 411))
         self.listWidget.setObjectName("listWidget")
@@ -35,7 +35,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Content"))
-        self.pushButton.setText(_translate("Dialog", "Cancel"))
+        self.cancel_btn.setText(_translate("Dialog", "Cancel"))
         self.label.setText(_translate("Dialog", "Archive content"))
         self.return_btn.setText(_translate("Dialog", "←"))
 

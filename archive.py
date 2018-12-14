@@ -22,13 +22,13 @@ class Archive(QMainWindow, Ui_MainWindow):
             QToolTip.setFont(QFont('SansSerif', 10))
         except Exception:
             pass
-        self.pushButton.clicked.connect(self.button_first_clicked)
-        self.pushButton.setToolTip("create <b>archive</b>\nfrom <b>folder</b>")
-        self.pushButton_2.clicked.connect(self.button_third_clicked)
-        self.pushButton_2.setToolTip("<b>archive</b> unpacking")
-        self.pushButton_5.clicked.connect(self.button_second_clicked)
-        self.pushButton_5.setToolTip("create <b>archive</b>\nfrom <b>file</b>")
-        self.pushButton_4.clicked.connect(self.update_recent_arcs)
+        self.add_folder_button.clicked.connect(self.button_first_clicked)
+        self.add_folder_button.setToolTip("create <b>archive</b>\nfrom <b>folder</b>")
+        self.extarct_button.clicked.connect(self.button_third_clicked)
+        self.extarct_button.setToolTip("<b>archive</b> unpacking")
+        self.add_file_button.clicked.connect(self.button_second_clicked)
+        self.add_file_button.setToolTip("create <b>archive</b>\nfrom <b>file</b>")
+        self.update_inf_button.clicked.connect(self.update_recent_arcs)
         self.model = QFileSystemModel()
         self.model.setRootPath(QDir.rootPath())
         self.treeView.setModel(self.model)
@@ -316,7 +316,7 @@ class DialogView(QDialog, Ui_Dialog):
     def __init__(self, path):
         super().__init__()
         self.setupUi(self)
-        self.pushButton.clicked.connect(self.close)
+        self.cancel_btn.clicked.connect(self.close)
         self.return_btn.clicked.connect(self.back)
         self.start_path = path
         self.path = path
