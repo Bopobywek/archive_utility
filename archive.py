@@ -191,7 +191,7 @@ class Archive(QMainWindow, Ui_MainWindow):
                 "Выберите тип архива:",
                 tuple(x[0] for x in shutil.get_archive_formats()),
                 1,
-                True)
+                False)
             if state_type:
                 name_arc, state_arc = QInputDialog.getText(self, "Укажите название",
                                                            "Укажите название архива\t(без указания типа)")
