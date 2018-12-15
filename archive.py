@@ -28,7 +28,7 @@ class Archive(QMainWindow, Ui_MainWindow):
         self.pushButton_2.setToolTip("<b>archive</b> unpacking")
         self.pushButton_5.clicked.connect(self.button_second_clicked)
         self.pushButton_5.setToolTip("create <b>archive</b>\nfrom <b>file</b>")
-        self.pushButton_3.setToolTip("Delete files and folders")
+        self.pushButton_3.setToolTip("Delete file or folder")
         self.pushButton_3.clicked.connect(self.delete_clicked)
         self.pushButton_4.clicked.connect(self.update_recent_arcs)
         self.model = QFileSystemModel()
@@ -138,7 +138,7 @@ class Archive(QMainWindow, Ui_MainWindow):
                 msg.exec_()
         except Exception as e:
             self.show_report_msgbox(e)
-            
+
     def delete_clicked(self):
         try:
             file = self.model.filePath(self.treeView.currentIndex())
@@ -228,13 +228,24 @@ class Archive(QMainWindow, Ui_MainWindow):
                 1,
                 True)
             if state_type:
-                name_arc, state_arc = QInputDialog.getText(self, "Укажите название",
-                                                           "Укажите название архива\t(без указания типа)")
+                name_arc = dir_name_out
+                res2, opt2 = QInputDialog.getItem(
+                    self,
+                    'Дополнительно',
+                    "Сохранить название исходного файла?",
+                    ('да', 'нет'),
+                    1,
+                    True)
+                state_arc = True
+                name_arc = dir_name_out
+                if opt2 and res2 == 'нет':
+                    name_arc, state_arc = QInputDialog.getText(self, "Укажите название",
+                                                               "Укажите название архива\t(без указания типа)")
                 if state_arc:
                     dir_name_in = QFileDialog.getExistingDirectory(self, 'Select directory')
                     if dir_name_in:
                         result, message = ArchiveFunctional().create_arhcive(name_arc, result_type,
-                                                                             dir_name_out, dir_name_in)
+                                                                         dir_name_out, dir_name_in)
                         if not result:
                             self.show_report_msgbox(message)
                         else:
