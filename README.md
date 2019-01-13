@@ -1,5 +1,5 @@
-# small_group_archive_utility
-Small utility for work bzip, gztar, tar, xztar and zip archives
+# Archive utility
+Small utility for work with bzip, gztar, tar, xztar and zip archives
 
 ## Installation
 Download ZIP-archive from [this](https://github.com/Bopobywek/small_group_archive_utility.git)
